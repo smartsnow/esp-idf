@@ -56,6 +56,9 @@ import functools
 import copy
 from collections import OrderedDict, namedtuple
 
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
+
 try:
     import typing  # noqa: F401
 except ImportError:
