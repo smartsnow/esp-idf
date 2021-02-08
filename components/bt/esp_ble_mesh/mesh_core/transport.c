@@ -50,7 +50,7 @@ _Static_assert(CONFIG_BLE_MESH_ADV_BUF_COUNT >= (CONFIG_BLE_MESH_TX_SEG_MAX + 3)
 #define SEQ_AUTH(iv_index, seq)     (((u64_t)iv_index) << 24 | (u64_t)seq)
 
 /* Number of retransmit attempts (after the initial transmit) per segment */
-#define SEG_RETRANSMIT_ATTEMPTS     4
+#define SEG_RETRANSMIT_ATTEMPTS     3
 
 /* "This timer shall be set to a minimum of 200 + 50 * TTL milliseconds.".
  * We use 400 since 300 is a common send duration for standard HCI, and we
@@ -115,6 +115,11 @@ static u16_t hb_sub_dst = BLE_MESH_ADDR_UNASSIGNED;
 
 static bt_mesh_mutex_t tx_seg_lock;
 static bt_mesh_mutex_t rx_seg_lock;
+
+__attribute__((weak)) 
+void mble_mesh_seg_send_cb(int err)
+{
+}
 
 static void bt_mesh_tx_seg_mutex_new(void)
 {
@@ -308,6 +313,8 @@ static inline void seg_tx_complete(struct seg_tx *tx, int err)
     if (cb && cb->end) {
         cb->end(err, cb_data);
     }
+
+    mble_mesh_seg_send_cb(err);
 }
 
 static void schedule_retransmit(struct seg_tx *tx)
